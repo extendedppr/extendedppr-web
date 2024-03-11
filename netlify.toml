@@ -1,0 +1,20 @@
+[build]
+  command = "npm run build"
+  functions = "netlify/functions"
+  publish = "build"
+
+  [[redirects]]
+    from = "/eppr-web/static/js/*"
+    to = "/static/js/:splat"
+    status = 301
+    force = true
+
+  [[redirects]]
+    from = "/eppr-web/static/css/*"
+    to = "/static/css/:splat"
+    status = 301
+    force = true
+
+  [dev]
+    targetPort = 3000
+    publish = "dist"

@@ -1,0 +1,25 @@
+.loading-wheel-container {
+  z-index: 1000;
+  position: fixed; /* Fixed positioning to place it relative to the viewport */
+  top: 0; /* Align to the top */
+  right: 0; /* Align to the right */
+  padding: 10px; /* Add some space around the loading wheel */
+}
+
+.loading-wheel {
+  border: 5px solid #f3f3f3; /* Light grey border */
+  border-top: 5px solid #3498db; /* Blue border */
+  border-radius: 50%; /* Circular shape */
+  width: 40px; /* Size of the wheel */
+  height: 40px; /* Size of the wheel */
+  animation: spin 2s linear infinite; /* Animation */
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}

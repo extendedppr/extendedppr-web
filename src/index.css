@@ -1,0 +1,24 @@
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+}
+#root,
+#map,
+#mapUI {
+  width: inherit;
+  height: inherit;
+}
+
+.popup-content p {
+  margin-bottom: 0px !important;
+  margin: 0px !important;
+}
+.hidden {
+  display: none;
+}
+.leaflet-popup-content {
+  line-height: 1;
+}

@@ -1,0 +1,53 @@
+{
+  "description": "Leaflet React demo",
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/extendedppr/eppr-web"
+  },
+  "keywords": [
+    "react, leaflet"
+  ],
+  "author": "extendedppr",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/extendedppr/eppr-web/issues"
+  },
+  "homepage": "https://extendedppr.com",
+  "name": "eppr-web",
+  "version": "0.0.1",
+  "private": true,
+  "devDependencies": {
+    "netlify-cli": "^3.21.0"
+  },
+  "dependencies": {
+    "axios": "^1.6.7",
+    "json-loader": "^0.5.4",
+    "leaflet": "^0.7.7",
+    "rc-tooltip": "^6.2.0",
+    "react": "^17.0.0",
+    "react-dom": "^17.0.0",
+    "react-scripts": "^5.0.1",
+    "react-select": "^4.0.0",
+    "react-tooltip": "^5.26.3",
+    "recharts": "^2.12.2",
+    "tooltip": "^1.6.1"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}

@@ -1,0 +1,14 @@
+.bottomRightBox {
+  position: fixed;
+  top: 100px; /* Adjust the distance from the bottom */
+  right: 20px; /* Adjust the distance from the right side */
+  background-color: rgba(0, 0, 255, 0.8); /* Semi-transparent black */
+  color: #fff; /* White text color */
+  padding: 10px 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  font-family: Arial, sans-serif; /* Customize as needed */
+  z-index: 2000; /* Ensure it sits above most other elements */
+
+  max-width: 20%; /* Maximum width of 20% of the viewport */
+}

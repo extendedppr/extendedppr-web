@@ -1,0 +1,29 @@
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+}
+#root,
+#map,
+#mapUI {
+  width: inherit;
+  height: inherit;
+  background-color: #000;
+}
+.custom-popup {
+  top: 1px !important;
+  bottom: 0px !important;
+  right: 70% !important;
+  display: flex !important;
+  align-items: right !important;
+  justify-items: right !important;
+}
+
+.popup-content p {
+  margin: 0px 0; /* Adjust the margin as needed */
+}
+.hidden {
+  display: none;
+}
