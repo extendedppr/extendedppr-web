@@ -8,7 +8,7 @@ Graphs of information also included, more work needed here to add more stats.
 
 Still plenty of data to get, clean and add.
 
-Mapbox used for geocoding, will use something else for badly scoring matches in time since when matches are bad, they're very bad.
+Mapbox used for geocoding with Arcgis being used on low scoring matches if possible. I will use something else in future since when matches are bad, they're very bad.
 
 ## TODO
  * Upload api repo
