@@ -800,9 +800,19 @@ class Map extends Component {
   }
 
   pointToLayer(feature, latlng) {
+    let radius = 7;
+
+    if (
+      "ontouchstart" in window ||
+      navigator.maxTouchPoints > 0 ||
+      navigator.msMaxTouchPoints > 0
+    ) {
+      radius = 15;
+    }
+
     if (this.state.dataOption === "matchedWithPPR") {
       var markerParams = {
-        radius: 7,
+        radius: radius,
         fillColor: "grey", // Default to grey if under_pc is null
         color: "black",
         weight: 1,
@@ -831,7 +841,7 @@ class Map extends Component {
       }
     } else if (this.state.dataOption === "allHistoricalListings") {
       var markerParams = {
-        radius: 7,
+        radius: radius,
         fillColor: "grey", // Default to grey if under_pc is null
         color: "black",
         weight: 1,
@@ -981,16 +991,6 @@ class Map extends Component {
   }
 
   init(id, callback) {
-    if (
-      "ontouchstart" in window ||
-      navigator.maxTouchPoints > 0 ||
-      navigator.msMaxTouchPoints > 0
-    ) {
-      alert(
-        "You are using a mobile device, you can continue but things would work better on a desktop"
-      );
-    }
-
     if (this.state.map) return;
     let map = L.map(id, config.params);
 
