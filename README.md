@@ -14,3 +14,4 @@ Mapbox used for geocoding with Arcgis being used on low scoring matches if possi
  * Upload api repo
  * Include rentals / share
  * Upload listing scraper and ppr matching repo
+ * Find a way to deal with overlapping properties
