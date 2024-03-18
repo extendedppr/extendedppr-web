@@ -902,8 +902,6 @@ class Map extends Component {
           })
           .then((data) => {
             if (this.state.dataOption === "matchedWithPPR") {
-              console.log("GOT DATA MATCHED");
-              console.log(data);
               const address = data.ppr_address;
               const county = data.county;
               const eircode = data.eircode_routing_key;
@@ -944,8 +942,6 @@ class Map extends Component {
 
               layer.bindPopup(popup).openPopup();
             } else if (this.state.dataOption === "allHistoricalListings") {
-              console.log("GOT DATA ALL");
-              console.log(data);
               const address = data.original_address;
               const county = data.county;
               const eircode = data.eircode_routing_key;
