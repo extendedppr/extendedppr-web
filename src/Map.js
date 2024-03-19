@@ -21,8 +21,14 @@ import {
 } from "recharts";
 
 let config = {};
+
+const params = new URLSearchParams(window.location.search);
+
 config.params = {
-  center: [53, -6],
+  center: [
+    params.get("lat") ? parseFloat(params.get("lat")) : 53,
+    params.get("lng") ? parseFloat(params.get("lng")) : -6,
+  ],
   scrollwheel: false,
   legends: true,
   infoControl: false,
@@ -609,7 +615,6 @@ class Map extends Component {
       tileLayer: null,
       geojsonLayer: null,
       geojson: null,
-      countyFilter: "*",
       startYear: 2023,
       endYear: 2024,
       lastUpdatedDate: new Date(),
@@ -620,8 +625,11 @@ class Map extends Component {
       lastUpdatedZoom: 0,
       currentZoom: 0,
       filterCounties: [],
+      filterCountiesObj: [],
       filterPropertyTypes: [],
+      filterPropertyTypesObj: [],
       filterAgents: [],
+      filterAgentsObj: [],
       minBeds: 0,
       maxBeds: 10,
       dataOption: "matchedWithPPR",
@@ -764,6 +772,7 @@ class Map extends Component {
     this.setState(
       { showModal: false, filterCounties: e.map((item) => item.value) },
       () => {
+        this.updateUrl();
         this.getData();
       }
     );
@@ -772,6 +781,7 @@ class Map extends Component {
     this.setState(
       { showModal: false, filterPropertyTypes: e.map((item) => item.value) },
       () => {
+        this.updateUrl();
         this.getData();
       }
     );
@@ -780,6 +790,7 @@ class Map extends Component {
     this.setState(
       { showModal: false, filterAgents: e.map((item) => item.value) },
       () => {
+        this.updateUrl();
         this.getData();
       }
     );
@@ -990,13 +1001,55 @@ class Map extends Component {
     if (this.state.map) return;
     let map = L.map(id, config.params);
 
-    const irelandCenter = { lat: 53.4, lng: -7.9 }; // Approximate center of Ireland
-    const zoomLevel = 8; // Good enough to see the country
+    const filterCounties = JSON.parse(params.get("counties"))
+      ? params.get("counties")
+      : ["all"];
+    const filterCountiesObj = counties.filter((county) =>
+      filterCounties.includes(county.value)
+    );
 
-    map.setView([irelandCenter.lat, irelandCenter.lng], zoomLevel);
+    const filterAgents = params.get("agents") ? params.get("agents") : ["all"];
+    const filterAgentsObj = agents.filter((agent) =>
+      filterAgents.includes(agent.value)
+    );
+
+    const filterPropertyTypes = params.get("propertytypes")
+      ? params.get("propertytypes")
+      : ["all"];
+    const filterPropertyTypesObj = propertyTypes.filter((property_type) =>
+      filterPropertyTypes.includes(property_type.value)
+    );
+
+    const startYear = params.get("startyear") ? params.get("startyear") : 2023;
+    const endYear = params.get("endyear") ? params.get("endyear") : 2025;
+    const dataOption = params.get("dataoption")
+      ? params.get("dataoption")
+      : "matchedWithPPR";
+    const minBeds = params.get("minbeds") ? params.get("minbeds") : 0;
+    const maxBeds = params.get("maxbeds") ? params.get("maxbeds") : 10;
+
+    const zoom = params.get("zoom") ? parseInt(params.get("zoom"), 10) : 8;
+    const lat = params.get("lat") ? parseFloat(params.get("lat")) : 53.4;
+    const lng = params.get("lng") ? parseFloat(params.get("lng")) : -7.9;
+
+    const irelandCenter = { lat: lat, lng: lng };
+
+    map.setView([irelandCenter.lat, irelandCenter.lng], zoom);
 
     map.on("move", this.handleMapMove);
     map.on("zoomend", this.handleMapZoomEnd);
+
+    if (map !== null) {
+      const center = map.getCenter();
+      const zoom = map.getZoom();
+
+      this.setState(
+        { currentLat: center.lat, currentLng: center.lng, currentZoom: zoom },
+        () => {
+          this.updateUrl();
+        }
+      );
+    }
 
     const tileLayer = L.tileLayer(
       config.tileLayer.uri,
@@ -1010,26 +1063,111 @@ class Map extends Component {
       messageText = allHistoricalListings;
     }
 
-    this.setState({ messageText, map, tileLayer }, callback);
+    this.setState(
+      {
+        filterCounties,
+        filterCountiesObj,
+        filterAgents,
+        filterAgentsObj,
+        filterPropertyTypes,
+        filterPropertyTypesObj,
+        startYear,
+        endYear,
+        dataOption,
+        minBeds,
+        maxBeds,
+        messageText,
+        map,
+        tileLayer,
+      },
+      callback
+    );
   }
 
   handleMapMove() {
     const { map } = this.state;
     if (map !== null) {
-      const bounds = map.getBounds();
-      const northeast = bounds.getNorthEast();
-      this.setState({ currentLat: northeast.lat, currentLng: northeast.lng });
+      const center = map.getCenter();
+      const zoom = map.getZoom();
+
+      this.setState(
+        { currentLat: center.lat, currentLng: center.lng, currentZoom: zoom },
+        () => {
+          this.updateUrl();
+        }
+      );
     }
+  }
+
+  parseUntilArray(jsonString) {
+    let result = jsonString;
+
+    if (Object.prototype.toString.call(jsonString) === "[object Array]") {
+      return jsonString;
+    }
+
+    // Attempt to parse the jsonString and continue doing so until
+    // the result is an array.
+    while (true) {
+      try {
+        // Parse the current string.
+        result = JSON.parse(result);
+
+        // If the result is an array, break out of the loop.
+        if (Array.isArray(result)) {
+          break;
+        }
+      } catch (error) {
+        // If JSON.parse fails, log the error and break out of the loop.
+        console.error("Failed to parse JSON:", error);
+        break;
+      }
+    }
+
+    return result;
+  }
+
+  updateUrl() {
+    this.setState(
+      {
+        filterCounties: this.parseUntilArray(this.state.filterCounties),
+        filterAgents: this.parseUntilArray(this.state.filterAgents),
+        filterPropertyTypes: this.parseUntilArray(
+          this.state.filterPropertyTypes
+        ),
+      },
+      () => {
+        const newUrl = `${window.location.pathname}?lat=${
+          this.state.currentLat
+        }&lng=${this.state.currentLng}&zoom=${
+          this.state.currentZoom
+        }&counties=${JSON.stringify(
+          this.state.filterCounties
+        )}&agents=${JSON.stringify(
+          this.state.filterAgents
+        )}&propertytypes=${JSON.stringify(
+          this.state.filterPropertyTypes
+        )}&startyear=${this.state.startYear}&endyear=${
+          this.state.endYear
+        }&dataoption=${this.state.dataOption}&minbeds=${
+          this.state.minBeds
+        }&maxbeds=${this.state.maxBeds}`;
+        window.history.pushState({ path: newUrl }, "", newUrl);
+      }
+    );
   }
 
   handleMapZoomEnd() {
     const { map } = this.state;
-    this.setState({ currentZoom: map.getZoom() });
+    this.setState({ currentZoom: map.getZoom() }, () => {
+      this.updateUrl();
+    });
   }
 
   handleMinBeds(event) {
     const minBeds = parseInt(event.target.value);
     this.setState({ showModal: false, minBeds: minBeds }, () => {
+      this.updateUrl();
       if (this.state.minBeds >= 0 && this.state.minBeds <= 100) {
         this.getData();
       }
@@ -1039,6 +1177,7 @@ class Map extends Component {
   handleMaxBeds(event) {
     const maxBeds = parseInt(event.target.value);
     this.setState({ showModal: false, maxBeds: maxBeds }, () => {
+      this.updateUrl();
       if (this.state.maxBeds >= 0 && this.state.maxBeds <= 100) {
         this.getData();
       }
@@ -1048,6 +1187,7 @@ class Map extends Component {
   handleStartChange(event) {
     const year = parseInt(event.target.value);
     this.setState({ showModal: false, startYear: year }, () => {
+      this.updateUrl();
       if (this.state.startYear >= 2010 && this.state.startYear <= 2024) {
         this.getData();
       }
@@ -1057,6 +1197,7 @@ class Map extends Component {
   handleEndChange(event) {
     const year = parseInt(event.target.value);
     this.setState({ showModal: false, endYear: year }, () => {
+      this.updateUrl();
       if (this.state.startYear >= 2010 && this.state.startYear <= 2024) {
         this.getData();
       }
@@ -1077,6 +1218,7 @@ class Map extends Component {
         dataOption: event.target.value,
       },
       () => {
+        this.updateUrl();
         this.getData();
       }
     );
@@ -1103,34 +1245,40 @@ class Map extends Component {
         <GithubRepoLink repoUrl="https://github.com/extendedppr/eppr-web" />
         <MessageBox text={this.state.messageText} />
         <LoadingWheel isVisible={this.state.isLoading} />
-        {counties.length && (
-          <Filter
-            counties={counties}
-            updateCounties={this.updateCounties}
-            updatePropertyTypes={this.updatePropertyTypes}
-            updateAgents={this.updateAgents}
-            property_types={propertyTypes}
-            agents={agents}
-            startYear={this.state.startYear}
-            endYear={this.state.endYear}
-            handleStartChange={this.handleStartChange}
-            handleEndChange={this.handleEndChange}
-            showModal={this.state.showModal}
-            minBeds={this.state.minBeds}
-            maxBeds={this.state.maxBeds}
-            handleMinBeds={this.handleMinBeds}
-            handleMaxBeds={this.handleMaxBeds}
-            dataOption={this.state.dataOption}
-            handleDataOptionChange={this.handleDataOptionChange}
-          />
-        )}
+        {counties.length &&
+          this.state.filterCountiesObj.length &&
+          this.state.filterAgentsObj.length &&
+          this.state.filterPropertyTypesObj && (
+            <Filter
+              counties={counties}
+              selectedCounties={this.state.filterCountiesObj}
+              selectedAgents={this.state.filterAgentsObj}
+              selectedPropertyTypes={this.state.filterPropertyTypesObj}
+              updateCounties={this.updateCounties}
+              updatePropertyTypes={this.updatePropertyTypes}
+              updateAgents={this.updateAgents}
+              property_types={propertyTypes}
+              agents={agents}
+              startYear={this.state.startYear}
+              endYear={this.state.endYear}
+              handleStartChange={this.handleStartChange}
+              handleEndChange={this.handleEndChange}
+              showModal={this.state.showModal}
+              minBeds={this.state.minBeds}
+              maxBeds={this.state.maxBeds}
+              handleMinBeds={this.handleMinBeds}
+              handleMaxBeds={this.handleMaxBeds}
+              dataOption={this.state.dataOption}
+              handleDataOptionChange={this.handleDataOptionChange}
+            />
+          )}
         <ToggleChartsButton onClick={this.toggleModal} />
         {this.state.showModal && (
           <AnalyticsModal
             dataOption={this.state.dataOption}
             counties={this.state.filterCounties}
             agents={this.state.filterAgents}
-            property_types={propertyTypes}
+            property_types={this.state.filterPropertyTypes}
             startYear={this.state.startYear}
             endYear={this.state.endYear}
             minBeds={this.state.minBeds}

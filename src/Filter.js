@@ -7,6 +7,9 @@ import "rc-tooltip/assets/bootstrap.css";
 export default (props) => {
   const {
     counties,
+    selectedCounties,
+    selectedAgents,
+    selectedPropertyTypes,
     updateCounties,
     updatePropertyTypes,
     updateAgents,
@@ -138,7 +141,7 @@ export default (props) => {
                 styles={selectStyles}
                 options={counties}
                 isMulti
-                defaultValue={[counties[0]]}
+                defaultValue={selectedCounties}
                 onChange={(e) => updateCounties(e)}
               />
             </div>
@@ -150,7 +153,7 @@ export default (props) => {
                 styles={selectStyles}
                 options={property_types}
                 isMulti
-                defaultValue={[property_types[0]]}
+                defaultValue={selectedPropertyTypes}
                 onChange={(e) => updatePropertyTypes(e)}
               />
             </div>
@@ -162,7 +165,7 @@ export default (props) => {
                 styles={selectStyles}
                 options={agents}
                 isMulti
-                defaultValue={[agents[0]]}
+                defaultValue={selectedAgents}
                 onChange={(e) => updateAgents(e)}
               />
             </div>

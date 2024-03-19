@@ -18,6 +18,8 @@ import AvgChart from "./AvgChart";
 import EircodePriceChart from "./EircodePriceChart";
 import EircodeUndervaluedChart from "./EircodeUndervaluedChart";
 
+const api_domain = "https://9i4sfrsht5.execute-api.eu-west-1.amazonaws.com";
+
 class AnalyticsModal extends Component {
   constructor(props) {
     super(props);
@@ -38,7 +40,7 @@ class AnalyticsModal extends Component {
   fetchPropertyData() {
     let queryParamsObj = {
       filterCounties: this.props.counties,
-      filterPropertyTypes: this.props.propertyTypes,
+      filterPropertyTypes: this.props.property_types,
       filterAgents: this.props.agents,
 
       minDate: this.props.startYear,
@@ -53,9 +55,7 @@ class AnalyticsModal extends Component {
     const queryParams = new URLSearchParams(queryParamsObj).toString();
 
     if (this.props.dataOption === "matchedWithPPR") {
-      fetch(
-        `https://9i4sfrsht5.execute-api.eu-west-1.amazonaws.com/api/chartdata/undervalued_by_eircode?${queryParams}`
-      )
+      fetch(`${api_domain}/api/chartdata/undervalued_by_eircode?${queryParams}`)
         .then((response) => {
           if (!response.ok) {
             throw new Error("Network response was not ok");
@@ -75,9 +75,7 @@ class AnalyticsModal extends Component {
         });
     }
 
-    fetch(
-      `https://9i4sfrsht5.execute-api.eu-west-1.amazonaws.com/api/chartdata/avgprices?${queryParams}`
-    )
+    fetch(`${api_domain}/api/chartdata/avgprices?${queryParams}`)
       .then((response) => {
         if (!response.ok) {
           throw new Error("Network response was not ok");
@@ -93,9 +91,7 @@ class AnalyticsModal extends Component {
         console.error("There was a problem with your fetch operation:", error);
       });
 
-    fetch(
-      `https://9i4sfrsht5.execute-api.eu-west-1.amazonaws.com/api/chartdata/avgpricesbyeircode?${queryParams}`
-    )
+    fetch(`${api_domain}/api/chartdata/avgpricesbyeircode?${queryParams}`)
       .then((response) => {
         if (!response.ok) {
           throw new Error("Network response was not ok");
@@ -127,7 +123,8 @@ class AnalyticsModal extends Component {
         </p>
         <p>
           Also, the PPR is riddled with issues which may impact the results. I
-          have attempted to get rid of as many obvious errors as possible
+          have attempted to get rid of as many obvious errors as possible but
+          there is more work to be done
         </p>
         <button onClick={this.fetchPropertyData}>Update Charts</button>
 
@@ -141,7 +138,6 @@ class AnalyticsModal extends Component {
             <AvgChart data={avgData} />
             <EircodeUndervaluedChart data={undervaluedByEircode} />
             <EircodePriceChart data={eircodePriceData} />
-            TODO: A lot more
           </div>
         )}
 
@@ -154,7 +150,6 @@ class AnalyticsModal extends Component {
             </p>
             <AvgChart data={avgData} />
             <EircodePriceChart data={eircodePriceData} />
-            TODO: all graphs
           </div>
         )}
       </div>
