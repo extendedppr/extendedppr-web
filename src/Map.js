@@ -606,7 +606,7 @@ const propertyTypes = [
 
 class Map extends Component {
   constructor(props) {
-    //alert("Data is being updated, check back in 30 when it should all there.");
+    alert("Data is being updated, check back in 30 when it should all there.");
     super(props);
     this.state = {
       isLoading: false,
