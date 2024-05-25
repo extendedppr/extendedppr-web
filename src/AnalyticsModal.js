@@ -18,7 +18,7 @@ import AvgChart from "./AvgChart";
 import EircodePriceChart from "./EircodePriceChart";
 import EircodeUndervaluedChart from "./EircodeUndervaluedChart";
 
-const api_domain = "https://9i4sfrsht5.execute-api.eu-west-1.amazonaws.com";
+const api_domain = "https://e4expolexk.execute-api.eu-west-1.amazonaws.com";
 
 class AnalyticsModal extends Component {
   constructor(props) {
@@ -55,7 +55,7 @@ class AnalyticsModal extends Component {
     const queryParams = new URLSearchParams(queryParamsObj).toString();
 
     if (this.props.dataOption === "matchedWithPPR") {
-      fetch(`${api_domain}/api/chartdata/undervalued_by_eircode?${queryParams}`)
+      fetch(`${api_domain}/api/chart/undervalued_by_eircode?${queryParams}`)
         .then((response) => {
           if (!response.ok) {
             throw new Error("Network response was not ok");
@@ -75,7 +75,7 @@ class AnalyticsModal extends Component {
         });
     }
 
-    fetch(`${api_domain}/api/chartdata/avgprices?${queryParams}`)
+    fetch(`${api_domain}/api/chart/avgprices?${queryParams}`)
       .then((response) => {
         if (!response.ok) {
           throw new Error("Network response was not ok");
@@ -84,14 +84,14 @@ class AnalyticsModal extends Component {
       })
       .then((data) => {
         this.setState({
-          avgData: data.avg_prices,
+          avgData: data,
         });
       })
       .catch((error) => {
         console.error("There was a problem with your fetch operation:", error);
       });
 
-    fetch(`${api_domain}/api/chartdata/avgpricesbyeircode?${queryParams}`)
+    fetch(`${api_domain}/api/chart/avgpricesbyeircode?${queryParams}`)
       .then((response) => {
         if (!response.ok) {
           throw new Error("Network response was not ok");

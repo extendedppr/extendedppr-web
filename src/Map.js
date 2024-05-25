@@ -45,12 +45,14 @@ config.tileLayer = {
   },
 };
 
-const api_domain = "https://9i4sfrsht5.execute-api.eu-west-1.amazonaws.com";
+const api_domain = "https://e4expolexk.execute-api.eu-west-1.amazonaws.com";
 
+const pprPriceMessage =
+  "This shows property sales by price. Be sure to look into the other options that show undervalued properties and listing prices in the bottom right corner. Click to minimize"
 const matchedMessage =
-  "This shows listings matched with the PPR entry (max 1000 at a time, zoom in for more). The colour shows a gradient of how undervalued a property is from green (not undervalued) to red (very undervalued). Grey means we don't know. Click this box to minimize";
+  "This shows listings matched with the PPR entry (max 1000 at a time, zoom in for more). The colour shows a gradient of how undervalued a property is from green (not undervalued) to red (very undervalued). Grey means we don't know. Click to minimize";
 const allHistoricalMessage =
-  "This shows historical listings (max 1000 at a time, zoom in for more). The colour shows how expensive a property is. Click this box to minimize";
+  "This shows historical listings (max 1000 at a time, zoom in for more). The colour shows how expensive a property is. Click to minimize";
 
 const agents = [
   { value: "all", label: "All" },
@@ -632,8 +634,8 @@ class Map extends Component {
       filterAgents: [],
       filterAgentsObj: [],
       minBeds: 0,
-      maxBeds: 10,
-      dataOption: "matchedWithPPR",
+      maxBeds: 100,
+      dataOption: "PPRPrice",
       messageText: "",
     };
     this._mapNode = null;
@@ -729,11 +731,13 @@ class Map extends Component {
 
     const queryParams = new URLSearchParams(bbox).toString();
 
-    let url = `${api_domain}/api/data?${queryParams}`;
+    let url = `${api_domain}/api/map/list/listings?${queryParams}`;
     if (this.state.dataOption === "matchedWithPPR") {
-      url = `${api_domain}/api/data?${queryParams}`;
+      url = `${api_domain}/api/map/list/undervalued?${queryParams}`;
     } else if (this.state.dataOption === "allHistoricalListings") {
-      url = `${api_domain}/api/data/listings?${queryParams}`;
+      url = `${api_domain}/api/map/list/listings?${queryParams}`;
+    } else if (this.state.dataOption === "PPRPrice") {
+      url = `${api_domain}/api/map/list/ppr_price?${queryParams}`;
     }
     this.setState({ isLoading: true });
     fetch(url)
@@ -822,7 +826,42 @@ class Map extends Component {
       radius = 15;
     }
 
-    if (this.state.dataOption === "matchedWithPPR") {
+    if (this.state.dataOption === "PPRPrice") {
+      var markerParams = {
+        radius: radius,
+        fillColor: "grey", // Default to grey if under_pc is null
+        color: "black",
+        weight: 1,
+        opacity: 0.5,
+        fillOpacity: 0.8,
+      };
+
+      let price = feature.properties.price;
+
+      const minValue = 0;
+      const maxValue = 850000;
+
+      if (price < minValue) price = minValue;
+      if (price > maxValue) price = maxValue;
+
+      const normalizedValue = (price - minValue) / (maxValue - minValue);
+      let red, green, blue;
+      if (normalizedValue < 0.5) {
+        red = Math.round(255 * (1 - 2 * normalizedValue));
+        green = 255;
+        blue = 0;
+      } else {
+        red = 255;
+        green = Math.round(255 * (2 - 2 * normalizedValue));
+        blue = 0;
+      }
+      markerParams.fillColor =
+        "#" +
+        red.toString(16).padStart(2, "0") +
+        green.toString(16).padStart(2, "0") +
+        blue.toString(16).padStart(2, "0");
+
+    } else if (this.state.dataOption === "matchedWithPPR") {
       var markerParams = {
         radius: radius,
         fillColor: "grey", // Default to grey if under_pc is null
@@ -898,11 +937,13 @@ class Map extends Component {
           objId: feature.properties._id,
         }).toString();
 
-        let url = `${api_domain}/api/data/property?${queryParams}`;
+        let url = `${api_domain}/api/property/detail?${queryParams}`;
         if (this.state.dataOption === "matchedWithPPR") {
-          url = `${api_domain}/api/data/property?${queryParams}`;
+          url = `${api_domain}/api/property/detail?${queryParams}`;
         } else if (this.state.dataOption === "allHistoricalListings") {
-          url = `${api_domain}/api/data/listing?${queryParams}`;
+          url = `${api_domain}/api/listing/detail?${queryParams}`;
+        } else if (this.state.dataOption === "PPRPrice") {
+          url = `${api_domain}/api/property/detail?${queryParams}`;
         }
 
         fetch(url)
@@ -913,7 +954,7 @@ class Map extends Component {
             return response.json();
           })
           .then((data) => {
-            if (this.state.dataOption === "matchedWithPPR") {
+            if (this.state.dataOption === "matchedWithPPR" || this.state.dataOption === "PPRPrice") {
               const address = data.ppr_address;
               const county = data.county;
               const eircode = data.eircode_routing_key;
@@ -1025,9 +1066,9 @@ class Map extends Component {
     const endYear = params.get("endyear") ? params.get("endyear") : 2025;
     const dataOption = params.get("dataoption")
       ? params.get("dataoption")
-      : "matchedWithPPR";
+      : "PPRPrice";
     const minBeds = params.get("minbeds") ? params.get("minbeds") : 0;
-    const maxBeds = params.get("maxbeds") ? params.get("maxbeds") : 10;
+    const maxBeds = params.get("maxbeds") ? params.get("maxbeds") : 100;
 
     const zoom = params.get("zoom") ? parseInt(params.get("zoom"), 10) : 8;
     const lat = params.get("lat") ? parseFloat(params.get("lat")) : 53.4;
@@ -1061,7 +1102,9 @@ class Map extends Component {
     if (this.state.dataOption === "matchedWithPPR") {
       messageText = matchedMessage;
     } else if (this.state.dataOption === "allHistoricalListings") {
-      messageText = allHistoricalListings;
+      messageText = allHistoricalMessage;
+    } else if (this.state.dataOption === "PPRPrice") {
+      messageText = pprPriceMessage;
     }
 
     this.setState(
@@ -1211,6 +1254,8 @@ class Map extends Component {
       messageText = matchedMessage;
     } else if (event.target.value === "allHistoricalListings") {
       messageText = allHistoricalMessage;
+    } else if (event.target.value === "PPRPrice") {
+      messageText = pprPriceMessage;
     }
     this.setState(
       {

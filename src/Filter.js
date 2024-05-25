@@ -238,6 +238,24 @@ export default (props) => {
                   <Tooltip
                     placement="top"
                     overlay={
+                      "This will show all PPR sales by sale price"
+                    }
+                  >
+                    <label>
+                      <input
+                        type="radio"
+                        value="PPRPrice"
+                        checked={dataOption === "PPRPrice"}
+                        onChange={handleDataOptionChange}
+                      />
+                      PPR Sale Price
+                    </label>
+                  </Tooltip>
+                </div>
+                <div>
+                  <Tooltip
+                    placement="top"
+                    overlay={
                       "This will show all PPR sales, matched with their listing if available."
                     }
                   >
@@ -248,7 +266,7 @@ export default (props) => {
                         checked={dataOption === "matchedWithPPR"}
                         onChange={handleDataOptionChange}
                       />
-                      Matched with PPR
+                      Undervalued Properties
                     </label>
                   </Tooltip>
                 </div>
