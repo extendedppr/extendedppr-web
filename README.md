@@ -11,7 +11,6 @@ Still plenty of data to get, clean and add.
 Mapbox used for geocoding with Arcgis being used on low scoring matches if possible. I will use something else in future since when matches are bad, they're very bad.
 
 ## TODO
- * Upload api repo
  * Include rentals / share
  * Upload listing scraper and ppr matching repo
  * Find a way to deal with overlapping properties
