@@ -128,30 +128,18 @@ class AnalyticsModal extends Component {
         </p>
         <button onClick={this.fetchPropertyData}>Update Charts</button>
 
-        {this.props.dataOption == "matchedWithPPR" && (
-          <div>
-            <p style={{ color: "white" }}>
-              Note that all filters apply to graphs, the view of the map has no
-              impact. Also, there is no random sample as that is just to be
-              friendly to the browser.
-            </p>
-            <AvgChart data={avgData} />
+        <div>
+          <p style={{ color: "white" }}>
+            Note that all filters apply to graphs, the view of the map has no
+            impact. Also, there is no random sample as that is just to be
+            friendly to the browser.
+          </p>
+          <AvgChart data={avgData} />
+          {this.props.dataOption == "matchedWithPPR" && (
             <EircodeUndervaluedChart data={undervaluedByEircode} />
-            <EircodePriceChart data={eircodePriceData} />
-          </div>
-        )}
-
-        {this.props.dataOption == "allHistoricalListings" && (
-          <div>
-            <p style={{ color: "white" }}>
-              Note that all filters apply to graphs, the view of the map has no
-              impact. Also, there is no random sample as that is just to be
-              friendly to the browser.
-            </p>
-            <AvgChart data={avgData} />
-            <EircodePriceChart data={eircodePriceData} />
-          </div>
-        )}
+          )}
+          <EircodePriceChart data={eircodePriceData} />
+        </div>
       </div>
     );
   }

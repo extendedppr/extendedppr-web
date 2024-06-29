@@ -48,7 +48,7 @@ config.tileLayer = {
 const api_domain = "https://e4expolexk.execute-api.eu-west-1.amazonaws.com";
 
 const pprPriceMessage =
-  "This shows property sales by price. Be sure to look into the other options that show undervalued properties and listing prices in the bottom right corner. Click to minimize"
+  "This shows property sales by price. Be sure to look into the other options that show undervalued properties and listing prices in the bottom right corner. Click to minimize";
 const matchedMessage =
   "This shows listings matched with the PPR entry (max 1000 at a time, zoom in for more). The colour shows a gradient of how undervalued a property is from green (not undervalued) to red (very undervalued). Grey means we don't know. Click to minimize";
 const allHistoricalMessage =
@@ -860,7 +860,6 @@ class Map extends Component {
         red.toString(16).padStart(2, "0") +
         green.toString(16).padStart(2, "0") +
         blue.toString(16).padStart(2, "0");
-
     } else if (this.state.dataOption === "matchedWithPPR") {
       var markerParams = {
         radius: radius,
@@ -954,7 +953,10 @@ class Map extends Component {
             return response.json();
           })
           .then((data) => {
-            if (this.state.dataOption === "matchedWithPPR" || this.state.dataOption === "PPRPrice") {
+            if (
+              this.state.dataOption === "matchedWithPPR" ||
+              this.state.dataOption === "PPRPrice"
+            ) {
               const address = data.ppr_address;
               const county = data.county;
               const eircode = data.eircode_routing_key;

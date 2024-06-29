@@ -10,6 +10,13 @@ Still plenty of data to get, clean and add.
 
 Mapbox used for geocoding with Arcgis being used on low scoring matches if possible. I will use something else in future since when matches are bad, they're very bad.
 
+## Running Locally
+
+```bash
+npm install
+npm start
+```
+
 ## TODO
  * Include rentals / share
  * Upload listing scraper and ppr matching repo

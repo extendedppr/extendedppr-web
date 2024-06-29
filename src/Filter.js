@@ -237,9 +237,7 @@ export default (props) => {
                 <div>
                   <Tooltip
                     placement="top"
-                    overlay={
-                      "This will show all PPR sales by sale price"
-                    }
+                    overlay={"This will show all PPR sales by sale price"}
                   >
                     <label>
                       <input
