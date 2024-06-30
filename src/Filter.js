@@ -272,7 +272,7 @@ export default (props) => {
                   <Tooltip
                     placement="top"
                     overlay={
-                      "This will show all listings and their prices from green (less expensive) to red (more expensive)."
+                      "Show all historical listings"
                     }
                   >
                     <label>
