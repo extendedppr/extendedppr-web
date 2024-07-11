@@ -48,11 +48,15 @@ config.tileLayer = {
 const api_domain = "https://e4expolexk.execute-api.eu-west-1.amazonaws.com";
 
 const pprPriceMessage =
-  "This shows property sales by price. Be sure to look into the other options that show undervalued properties and listing prices in the bottom right corner. Click to minimize";
+  "This shows property sales by price. Be sure to look into the other options that show other listing / rental / share in the bottom right corner. Click to minimize";
 const matchedMessage =
   "This shows listings matched with the PPR entry (max 1000 at a time, zoom in for more). The colour shows a gradient of how undervalued a property is from green (not undervalued) to red (very undervalued). Grey means we don't know. Click to minimize";
 const allHistoricalMessage =
   "This shows historical listings (max 1000 at a time, zoom in for more). The colour shows how expensive a property is. Click to minimize";
+const rentalMessage =
+  "This shows historical rental listings (max 1000 at a time, zoom in for more). The colour shows how expensive a property is. Click to minimize";
+const shareMessage =
+  "This shows historical share listings (max 1000 at a time, zoom in for more). The colour shows how expensive a property is. Click to minimize";
 
 const agents = [
   { value: "all", label: "All" },
@@ -635,6 +639,8 @@ class Map extends Component {
       filterAgentsObj: [],
       minBeds: 0,
       maxBeds: 100,
+      minPrice: 0,
+      maxPrice: 100000000,
       dataOption: "PPRPrice",
       messageText: "",
     };
@@ -654,6 +660,9 @@ class Map extends Component {
 
     this.handleMinBeds = this.handleMinBeds.bind(this);
     this.handleMaxBeds = this.handleMaxBeds.bind(this);
+
+    this.handleMinPrice = this.handleMinPrice.bind(this);
+    this.handleMaxPrice = this.handleMaxPrice.bind(this);
 
     this.openModal = this.openModal.bind(this);
     this.closeModal = this.closeModal.bind(this);
@@ -729,16 +738,35 @@ class Map extends Component {
     bbox.minBeds = this.state.minBeds;
     bbox.maxBeds = this.state.maxBeds;
 
+    bbox.minPrice = this.state.minPrice;
+    bbox.maxPrice = this.state.maxPrice;
+
     const queryParams = new URLSearchParams(bbox).toString();
 
-    let url = `${api_domain}/api/map/list/listings?${queryParams}`;
-    if (this.state.dataOption === "matchedWithPPR") {
-      url = `${api_domain}/api/map/list/undervalued?${queryParams}`;
-    } else if (this.state.dataOption === "allHistoricalListings") {
-      url = `${api_domain}/api/map/list/listings?${queryParams}`;
-    } else if (this.state.dataOption === "PPRPrice") {
-      url = `${api_domain}/api/map/list/ppr_price?${queryParams}`;
+    let url = "";
+    switch (this.state.dataOption) {
+      case "matchedWithPPR":
+        url = `${api_domain}/api/map/list/undervalued?${queryParams}`;
+        break;
+      case "allHistoricalListings":
+        url = `${api_domain}/api/map/list/listings?${queryParams}`;
+        break;
+      case "PPRPrice":
+        url = `${api_domain}/api/map/list/ppr_price?${queryParams}`;
+        break;
+      case "rentals":
+        url = `${api_domain}/api/map/list/rentals?${queryParams}`;
+        break;
+      case "shares":
+        url = `${api_domain}/api/map/list/shares?${queryParams}`;
+        break;
+      default:
+        url = `${api_domain}/api/map/list/listings?${queryParams}`;
+        break;
     }
+
+    console.log(url);
+
     this.setState({ isLoading: true });
     fetch(url)
       .then((response) => {
@@ -826,50 +854,16 @@ class Map extends Component {
       radius = 15;
     }
 
-    if (this.state.dataOption === "PPRPrice") {
-      var markerParams = {
-        radius: radius,
-        fillColor: "grey", // Default to grey if under_pc is null
-        color: "black",
-        weight: 1,
-        opacity: 0.5,
-        fillOpacity: 0.8,
-      };
+    var markerParams = {
+      radius: radius,
+      fillColor: "grey", // Default to grey if under_pc is null
+      color: "black",
+      weight: 1,
+      opacity: 0.5,
+      fillOpacity: 0.8,
+    };
 
-      let price = feature.properties.price;
-
-      const minValue = 0;
-      const maxValue = 850000;
-
-      if (price < minValue) price = minValue;
-      if (price > maxValue) price = maxValue;
-
-      const normalizedValue = (price - minValue) / (maxValue - minValue);
-      let red, green, blue;
-      if (normalizedValue < 0.5) {
-        red = Math.round(255 * (1 - 2 * normalizedValue));
-        green = 255;
-        blue = 0;
-      } else {
-        red = 255;
-        green = Math.round(255 * (2 - 2 * normalizedValue));
-        blue = 0;
-      }
-      markerParams.fillColor =
-        "#" +
-        red.toString(16).padStart(2, "0") +
-        green.toString(16).padStart(2, "0") +
-        blue.toString(16).padStart(2, "0");
-    } else if (this.state.dataOption === "matchedWithPPR") {
-      var markerParams = {
-        radius: radius,
-        fillColor: "grey", // Default to grey if under_pc is null
-        color: "black",
-        weight: 1,
-        opacity: 0.5,
-        fillOpacity: 0.8,
-      };
-
+    if (this.state.dataOption === "matchedWithPPR") {
       const underPc = feature.properties.under_pc;
 
       if (underPc !== null) {
@@ -889,35 +883,35 @@ class Map extends Component {
           markerParams.fillColor = `rgb(255,${greenValue},0)`;
         }
       }
-    } else if (this.state.dataOption === "allHistoricalListings") {
-      var markerParams = {
-        radius: radius,
-        fillColor: "grey", // Default to grey if under_pc is null
-        color: "black",
-        weight: 1,
-        opacity: 0.5,
-        fillOpacity: 0.8,
-      };
-
+    } else {
       let price = feature.properties.price;
+      let minValue = 0;
+      let maxValue = 0;
 
-      const minValue = 0;
-      const maxValue = 850000;
+      if (this.state.dataOption === "PPRPrice") {
+        minValue = 100000;
+        maxValue = 850000;
+      } else if (this.state.dataOption === "allHistoricalListings") {
+        minValue = 100000;
+        maxValue = 850000;
+      } else if (this.state.dataOption === "rentals") {
+        minValue = 800;
+        maxValue = 4000;
+      } else if (this.state.dataOption === "shares") {
+        minValue = 200;
+        maxValue = 1500;
+      }
 
       if (price < minValue) price = minValue;
       if (price > maxValue) price = maxValue;
 
       const normalizedValue = (price - minValue) / (maxValue - minValue);
       let red, green, blue;
-      if (normalizedValue < 0.5) {
-        red = Math.round(255 * (1 - 2 * normalizedValue));
-        green = 255;
-        blue = 0;
-      } else {
-        red = 255;
-        green = Math.round(255 * (2 - 2 * normalizedValue));
-        blue = 0;
-      }
+
+      red = Math.round(255 * normalizedValue);
+      green = Math.round(255 * (1 - normalizedValue));
+      blue = 0;
+
       markerParams.fillColor =
         "#" +
         red.toString(16).padStart(2, "0") +
@@ -929,20 +923,29 @@ class Map extends Component {
   }
 
   onEachFeature(feature, layer) {
-    // TODO: do not include items where there is not data for it
     layer.on({
       click: () => {
         const queryParams = new URLSearchParams({
           objId: feature.properties._id,
         }).toString();
 
-        let url = `${api_domain}/api/property/detail?${queryParams}`;
-        if (this.state.dataOption === "matchedWithPPR") {
-          url = `${api_domain}/api/property/detail?${queryParams}`;
-        } else if (this.state.dataOption === "allHistoricalListings") {
-          url = `${api_domain}/api/listing/detail?${queryParams}`;
-        } else if (this.state.dataOption === "PPRPrice") {
-          url = `${api_domain}/api/property/detail?${queryParams}`;
+        let url = "";
+        switch (this.state.dataOption) {
+          case "matchedWithPPR":
+          case "PPRPrice":
+            url = `${api_domain}/api/property/detail?${queryParams}`;
+            break;
+          case "allHistoricalListings":
+            url = `${api_domain}/api/listing/detail?${queryParams}`;
+            break;
+          case "rentals":
+            url = `${api_domain}/api/rental/detail?${queryParams}`;
+            break;
+          case "shares":
+            url = `${api_domain}/api/share/detail?${queryParams}`;
+            break;
+          default:
+            break;
         }
 
         fetch(url)
@@ -957,7 +960,7 @@ class Map extends Component {
               this.state.dataOption === "matchedWithPPR" ||
               this.state.dataOption === "PPRPrice"
             ) {
-              const address = data.ppr_address;
+              const address = data.clean_address;
               const county = data.county;
               const eircode = data.eircode_routing_key;
               const agent = data.clean_agent;
@@ -997,6 +1000,74 @@ class Map extends Component {
 
               layer.bindPopup(popup).openPopup();
             } else if (this.state.dataOption === "allHistoricalListings") {
+              const address = data.original_address;
+              const county = data.county;
+              const eircode = data.eircode_routing_key;
+              const agent = data.clean_agent;
+              const propertyType = data.property_type;
+              const listingPrice = data.price;
+              const beds = data.beds;
+              const baths = data.baths;
+              const squareMeters = data.m_squared;
+              const constructedDate = data.constructed_date;
+              const ber = data.ber;
+              const publishedDate = data.published_date;
+
+              const popupContent = `
+    <div class="popup-content">
+      <p><b>Address: </b>${address}  <b>County: </b>${county}</p>
+      <p><b>Eircode: </b>${eircode}</p>
+      <p><b>Agent: </b>${agent}</p>
+      <p><b>Property Type: </b>${propertyType}</p>
+      <p><b>Listed: </b>${listingPrice}
+      <p><b>Beds: </b>${beds}, <b>Baths: </b>${baths}</p>
+      <p><b>Square Meters: </b>${squareMeters}</p>
+      <p><b>Constructed Date: </b>${constructedDate}</p>
+      <p><b>BER: </b>${ber}</p>
+      <p><b>Published Date: </b>${publishedDate}</p>
+    </div>
+  `;
+
+              const popup = L.popup({
+                offset: L.point(0, -20),
+              }).setContent(popupContent);
+              layer.bindPopup(popup).openPopup();
+            } else if (this.state.dataOption === "rentals") {
+              // FIXME
+              const address = data.original_address;
+              const county = data.county;
+              const eircode = data.eircode_routing_key;
+              const agent = data.clean_agent;
+              const propertyType = data.property_type;
+              const listingPrice = data.price;
+              const beds = data.beds;
+              const baths = data.baths;
+              const squareMeters = data.m_squared;
+              const constructedDate = data.constructed_date;
+              const ber = data.ber;
+              const publishedDate = data.published_date;
+
+              const popupContent = `
+    <div class="popup-content">
+      <p><b>Address: </b>${address}  <b>County: </b>${county}</p>
+      <p><b>Eircode: </b>${eircode}</p>
+      <p><b>Agent: </b>${agent}</p>
+      <p><b>Property Type: </b>${propertyType}</p>
+      <p><b>Listed: </b>${listingPrice}
+      <p><b>Beds: </b>${beds}, <b>Baths: </b>${baths}</p>
+      <p><b>Square Meters: </b>${squareMeters}</p>
+      <p><b>Constructed Date: </b>${constructedDate}</p>
+      <p><b>BER: </b>${ber}</p>
+      <p><b>Published Date: </b>${publishedDate}</p>
+    </div>
+  `;
+
+              const popup = L.popup({
+                offset: L.point(0, -20),
+              }).setContent(popupContent);
+              layer.bindPopup(popup).openPopup();
+            } else if (this.state.dataOption === "shares") {
+              // FIXME
               const address = data.original_address;
               const county = data.county;
               const eircode = data.eircode_routing_key;
@@ -1072,6 +1143,11 @@ class Map extends Component {
     const minBeds = params.get("minbeds") ? params.get("minbeds") : 0;
     const maxBeds = params.get("maxbeds") ? params.get("maxbeds") : 100;
 
+    const minPrice = params.get("minprice") ? params.get("minprice") : 0;
+    const maxPrice = params.get("maxprice")
+      ? params.get("maxprice")
+      : 1000000000;
+
     const zoom = params.get("zoom") ? parseInt(params.get("zoom"), 10) : 8;
     const lat = params.get("lat") ? parseFloat(params.get("lat")) : 53.4;
     const lng = params.get("lng") ? parseFloat(params.get("lng")) : -7.9;
@@ -1101,12 +1177,24 @@ class Map extends Component {
     ).addTo(map);
 
     let messageText = null;
-    if (this.state.dataOption === "matchedWithPPR") {
-      messageText = matchedMessage;
-    } else if (this.state.dataOption === "allHistoricalListings") {
-      messageText = allHistoricalMessage;
-    } else if (this.state.dataOption === "PPRPrice") {
-      messageText = pprPriceMessage;
+    switch (this.state.dataOption) {
+      case "matchedWithPPR":
+        messageText = matchedMessage;
+        break;
+      case "allHistoricalListings":
+        messageText = allHistoricalMessage;
+        break;
+      case "PPRPrice":
+        messageText = pprPriceMessage;
+        break;
+      case "rentals":
+        messageText = rentalMessage;
+        break;
+      case "shares":
+        messageText = shareMessage;
+        break;
+      default:
+        messageText = null;
     }
 
     this.setState(
@@ -1122,6 +1210,8 @@ class Map extends Component {
         dataOption,
         minBeds,
         maxBeds,
+        minPrice,
+        maxPrice,
         messageText,
         map,
         tileLayer,
@@ -1152,19 +1242,14 @@ class Map extends Component {
       return jsonString;
     }
 
-    // Attempt to parse the jsonString and continue doing so until
-    // the result is an array.
     while (true) {
       try {
-        // Parse the current string.
         result = JSON.parse(result);
 
-        // If the result is an array, break out of the loop.
         if (Array.isArray(result)) {
           break;
         }
       } catch (error) {
-        // If JSON.parse fails, log the error and break out of the loop.
         console.error("Failed to parse JSON:", error);
         break;
       }
@@ -1193,7 +1278,9 @@ class Map extends Component {
           this.state.filterAgents
         )}&propertytypes=${JSON.stringify(
           this.state.filterPropertyTypes
-        )}&startyear=${this.state.startYear}&endyear=${
+        )}&minprice=${this.state.minPrice}&maxprice=${
+          this.state.maxPrice
+        }&startyear=${this.state.startYear}&endyear=${
           this.state.endYear
         }&dataoption=${this.state.dataOption}&minbeds=${
           this.state.minBeds
@@ -1207,6 +1294,26 @@ class Map extends Component {
     const { map } = this.state;
     this.setState({ currentZoom: map.getZoom() }, () => {
       this.updateUrl();
+    });
+  }
+
+  handleMinPrice(event) {
+    const minPrice = parseInt(event.target.value);
+    this.setState({ showModal: false, minPrice: minPrice }, () => {
+      this.updateUrl();
+      if (this.state.minPrice >= 0) {
+        this.getData();
+      }
+    });
+  }
+
+  handleMaxPrice(event) {
+    const maxPrice = parseInt(event.target.value);
+    this.setState({ showModal: false, maxPrice: maxPrice }, () => {
+      this.updateUrl();
+      if (this.state.maxPrice >= 0) {
+        this.getData();
+      }
     });
   }
 
@@ -1252,12 +1359,24 @@ class Map extends Component {
 
   handleDataOptionChange(event) {
     let messageText = null;
-    if (event.target.value === "matchedWithPPR") {
-      messageText = matchedMessage;
-    } else if (event.target.value === "allHistoricalListings") {
-      messageText = allHistoricalMessage;
-    } else if (event.target.value === "PPRPrice") {
-      messageText = pprPriceMessage;
+    switch (event.target.value) {
+      case "matchedWithPPR":
+        messageText = matchedMessage;
+        break;
+      case "allHistoricalListings":
+        messageText = allHistoricalMessage;
+        break;
+      case "PPRPrice":
+        messageText = pprPriceMessage;
+        break;
+      case "rentals":
+        messageText = rentalMessage;
+        break;
+      case "shares":
+        messageText = shareMessage;
+        break;
+      default:
+        messageText = null;
     }
     this.setState(
       {
@@ -1314,8 +1433,12 @@ class Map extends Component {
               showModal={this.state.showModal}
               minBeds={this.state.minBeds}
               maxBeds={this.state.maxBeds}
+              minPrice={this.state.minPrice}
+              maxPrice={this.state.maxPrice}
               handleMinBeds={this.handleMinBeds}
               handleMaxBeds={this.handleMaxBeds}
+              handleMinPrice={this.handleMinPrice}
+              handleMaxPrice={this.handleMaxPrice}
               dataOption={this.state.dataOption}
               handleDataOptionChange={this.handleDataOptionChange}
             />
@@ -1331,6 +1454,8 @@ class Map extends Component {
             endYear={this.state.endYear}
             minBeds={this.state.minBeds}
             maxBeds={this.state.maxBeds}
+            minPrice={this.state.minPrice}
+            maxPrice={this.state.maxPrice}
           />
         )}
         <div ref={(node) => (this._mapNode = node)} id="map" />

@@ -49,6 +49,9 @@ class AnalyticsModal extends Component {
       minBeds: this.props.minBeds,
       maxBeds: this.props.maxBeds,
 
+      minPrice: this.props.minPrice,
+      maxPrice: this.props.maxPrice,
+
       dataOption: this.props.dataOption,
     };
 

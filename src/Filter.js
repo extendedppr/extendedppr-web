@@ -22,8 +22,12 @@ export default (props) => {
     showModal,
     minBeds,
     maxBeds,
+    minPrice,
+    maxPrice,
     handleMinBeds,
     handleMaxBeds,
+    handleMinPrice,
+    handleMaxPrice,
     dataOption,
     handleDataOptionChange,
   } = props;
@@ -232,59 +236,117 @@ export default (props) => {
               </div>
             </div>
 
+            <div style={yearInputContainerStyle}>
+              <div>
+                <span>Min Price: </span>
+                <input
+                  type="number"
+                  value={minPrice}
+                  onChange={handleMinPrice}
+                  style={{
+                    backgroundColor: "#555",
+                    color: "white",
+                    borderColor: "white",
+                    marginLeft: "10px",
+                  }}
+                />
+              </div>
+              <div>
+                <span>Max Price: </span>
+                <input
+                  type="number"
+                  value={maxPrice}
+                  onChange={handleMaxPrice}
+                  style={{
+                    backgroundColor: "#555",
+                    color: "white",
+                    borderColor: "white",
+                    marginLeft: "10px",
+                  }}
+                />
+              </div>
+            </div>
+
             <div>
               <form>
                 <div>
-                  <Tooltip
-                    placement="top"
-                    overlay={"This will show all PPR sales by sale price"}
-                  >
-                    <label>
+                  <label>
+                    <Tooltip
+                      placement="top"
+                      overlay={"Show all PPR sales by sale price"}
+                    >
                       <input
                         type="radio"
                         value="PPRPrice"
                         checked={dataOption === "PPRPrice"}
                         onChange={handleDataOptionChange}
                       />
-                      PPR Sale Price
-                    </label>
-                  </Tooltip>
+                    </Tooltip>
+                    PPR Sale Price
+                  </label>
                 </div>
                 <div>
-                  <Tooltip
-                    placement="top"
-                    overlay={
-                      "This will show all PPR sales, matched with their listing if available."
-                    }
-                  >
-                    <label>
+                  <label>
+                    <Tooltip
+                      placement="top"
+                      overlay={
+                        "Show all PPR sales, matched with their listing if available"
+                      }
+                    >
                       <input
                         type="radio"
                         value="matchedWithPPR"
                         checked={dataOption === "matchedWithPPR"}
                         onChange={handleDataOptionChange}
                       />
-                      Undervalued Properties
-                    </label>
-                  </Tooltip>
+                    </Tooltip>
+                    Undervalued Properties
+                  </label>
                 </div>
                 <div>
-                  <Tooltip
-                    placement="top"
-                    overlay={
-                      "Show all historical listings"
-                    }
-                  >
-                    <label>
+                  <label>
+                    <Tooltip
+                      placement="top"
+                      overlay={"Show all historical listings."}
+                    >
                       <input
                         type="radio"
                         value="allHistoricalListings"
                         checked={dataOption === "allHistoricalListings"}
                         onChange={handleDataOptionChange}
                       />
-                      Historical Listings
-                    </label>
-                  </Tooltip>
+                    </Tooltip>
+                    Historical Listings
+                  </label>
+                </div>
+                <div>
+                  <label>
+                    <Tooltip
+                      placement="top"
+                      overlay={"Show all shared properties"}
+                    >
+                      <input
+                        type="radio"
+                        value="shares"
+                        checked={dataOption === "shares"}
+                        onChange={handleDataOptionChange}
+                      />
+                    </Tooltip>
+                    Shares
+                  </label>
+                </div>
+                <div>
+                  <label>
+                    <Tooltip placement="top" overlay={"Shows all rentals"}>
+                      <input
+                        type="radio"
+                        value="rentals"
+                        checked={dataOption === "rentals"}
+                        onChange={handleDataOptionChange}
+                      />
+                    </Tooltip>
+                    Rentals
+                  </label>
                 </div>
               </form>
             </div>
