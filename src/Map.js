@@ -925,12 +925,25 @@ class Map extends Component {
   onEachFeature(feature, layer) {
     layer.on({
       mouseover: (e) => {
-        const popupContent = `
+        let popupContent = "";
+        switch (this.state.dataOption) {
+          case "matchedWithPPR":
+            popupContent = `
+    <div class="popup-content">
+      <p><b>Undervalued %: </b>${feature.properties.under_pc}</p>
+      <p>Click for more details</p>
+    </div>
+  `;
+            break;
+          default:
+            popupContent = `
     <div class="popup-content">
       <p><b>Price: </b>${feature.properties.price}</p>
       <p>Click for more details</p>
     </div>
   `;
+            break;
+        }
 
         const popup = L.popup({
           offset: L.point(0, -20),
