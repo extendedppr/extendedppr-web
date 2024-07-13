@@ -45,7 +45,8 @@ config.tileLayer = {
   },
 };
 
-const api_domain = "https://e4expolexk.execute-api.eu-west-1.amazonaws.com";
+//const api_domain = "https://e4expolexk.execute-api.eu-west-1.amazonaws.com";
+const api_domain = "http://localhost:3000";
 
 const pprPriceMessage =
   "This shows property sales by price. Be sure to look into the other options that show other listing / rental / share in the bottom right corner. Click to minimize";
@@ -924,6 +925,20 @@ class Map extends Component {
 
   onEachFeature(feature, layer) {
     layer.on({
+      mouseover: (e) => {
+        const popupContent = `
+    <div class="popup-content">
+      <p><b>Price: </b>${feature.properties.price}</p>
+      <p>Click for more details</p>
+    </div>
+  `;
+
+        const popup = L.popup({
+          offset: L.point(0, -20),
+        }).setContent(popupContent);
+
+        layer.bindPopup(popup).openPopup();
+      },
       click: () => {
         const queryParams = new URLSearchParams({
           objId: feature.properties._id,
