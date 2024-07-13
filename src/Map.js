@@ -863,62 +863,47 @@ class Map extends Component {
       fillOpacity: 0.8,
     };
 
+    let value = null;
     if (this.state.dataOption === "matchedWithPPR") {
-      const underPc = feature.properties.under_pc;
-
-      if (underPc !== null) {
-        if (underPc <= 0) {
-          markerParams.fillColor = "green";
-        } else if (underPc >= 20) {
-          markerParams.fillColor = "red";
-        } else {
-          let intensity;
-          if (underPc <= 20) {
-            intensity = Math.min(underPc / 20, 1);
-          } else {
-            const adjustedValue = 20 + (underPc - 20) / 4;
-            intensity = Math.min(adjustedValue / 100, 1);
-          }
-          const greenValue = Math.floor(255 * (1 - intensity));
-          markerParams.fillColor = `rgb(255,${greenValue},0)`;
-        }
-      }
+      value = feature.properties.under_pc;
     } else {
-      let price = feature.properties.price;
-      let minValue = 0;
-      let maxValue = 0;
+      value = feature.properties.price;
+    }
+    let minValue = 0;
+    let maxValue = 0;
 
-      if (this.state.dataOption === "PPRPrice") {
-        minValue = 100000;
-        maxValue = 850000;
-      } else if (this.state.dataOption === "allHistoricalListings") {
-        minValue = 100000;
-        maxValue = 850000;
-      } else if (this.state.dataOption === "rentals") {
-        minValue = 800;
-        maxValue = 4000;
-      } else if (this.state.dataOption === "shares") {
-        minValue = 200;
-        maxValue = 1500;
-      }
-
-      if (price < minValue) price = minValue;
-      if (price > maxValue) price = maxValue;
-
-      const normalizedValue = (price - minValue) / (maxValue - minValue);
-      let red, green, blue;
-
-      red = Math.round(255 * normalizedValue);
-      green = Math.round(255 * (1 - normalizedValue));
-      blue = 0;
-
-      markerParams.fillColor =
-        "#" +
-        red.toString(16).padStart(2, "0") +
-        green.toString(16).padStart(2, "0") +
-        blue.toString(16).padStart(2, "0");
+    if (this.state.dataOption === "PPRPrice") {
+      minValue = 100000;
+      maxValue = 850000;
+    } else if (this.state.dataOption === "allHistoricalListings") {
+      minValue = 100000;
+      maxValue = 850000;
+    } else if (this.state.dataOption === "rentals") {
+      minValue = 800;
+      maxValue = 4000;
+    } else if (this.state.dataOption === "shares") {
+      minValue = 200;
+      maxValue = 1500;
+    } else if (this.state.dataOption === "matchedWithPPR") {
+      minValue = 0;
+      maxValue = 30;
     }
 
+    if (value < minValue) value = minValue;
+    if (value > maxValue) value = maxValue;
+
+    const normalizedValue = (value - minValue) / (maxValue - minValue);
+    let red, green, blue;
+
+    red = Math.round(255 * normalizedValue);
+    green = Math.round(255 * (1 - normalizedValue));
+    blue = 0;
+
+    markerParams.fillColor =
+      "#" +
+      red.toString(16).padStart(2, "0") +
+      green.toString(16).padStart(2, "0") +
+      blue.toString(16).padStart(2, "0");
     return L.circleMarker(latlng, markerParams);
   }
 
