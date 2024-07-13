@@ -45,8 +45,7 @@ config.tileLayer = {
   },
 };
 
-//const api_domain = "https://e4expolexk.execute-api.eu-west-1.amazonaws.com";
-const api_domain = "http://localhost:3000";
+const api_domain = "https://e4expolexk.execute-api.eu-west-1.amazonaws.com";
 
 const pprPriceMessage =
   "This shows property sales by price. Be sure to look into the other options that show other listing / rental / share in the bottom right corner. Click to minimize";
