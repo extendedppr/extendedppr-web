@@ -31,6 +31,13 @@ const EircodePriceChart = ({ data }) => {
     cursor: "pointer",
   };
 
+  const selectedButtonStyle = {
+    ...buttonStyle,
+    background: "#007bff",
+    color: "#fff",
+    border: "1px solid #007bff",
+  };
+
   return (
     <div>
       <h2>Eircode Price Average</h2>
@@ -57,7 +64,12 @@ const EircodePriceChart = ({ data }) => {
         <ul style={paginationStyle}>
           {pageNumbers.map((number) => (
             <li key={number}>
-              <button style={buttonStyle} onClick={() => paginate(number)}>
+              <button
+                style={
+                  currentPage === number ? selectedButtonStyle : buttonStyle
+                }
+                onClick={() => paginate(number)}
+              >
                 {number}
               </button>
             </li>
