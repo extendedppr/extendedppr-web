@@ -46,6 +46,7 @@ config.tileLayer = {
 };
 
 const api_domain = "https://e4expolexk.execute-api.eu-west-1.amazonaws.com";
+//const api_domain = "http://localhost:3000";
 
 const pprPriceMessage =
   "This shows property sales by price. Be sure to look into the other options that show other listing / rental / share in the bottom right corner. Click to minimize";
@@ -539,17 +540,12 @@ const agents = [
 
 const counties = [
   { value: "all", label: "All" },
-  { value: "antrim", label: "Antrim" },
-  { value: "armagh", label: "Armagh" },
   { value: "carlow", label: "Carlow" },
   { value: "cavan", label: "Cavan" },
   { value: "clare", label: "Clare" },
   { value: "cork", label: "Cork" },
-  { value: "derry", label: "Derry" },
   { value: "donegal", label: "Donegal" },
-  { value: "down", label: "Down" },
   { value: "dublin", label: "Dublin" },
-  { value: "fermanagh", label: "Fermanagh" },
   { value: "galway", label: "Galway" },
   { value: "kerry", label: "Kerry" },
   { value: "kildare", label: "Kildare" },
@@ -566,7 +562,6 @@ const counties = [
   { value: "roscommon", label: "Roscommon" },
   { value: "sligo", label: "Sligo" },
   { value: "tipperary", label: "Tipperary" },
-  { value: "tyrone", label: "Tyrone" },
   { value: "waterford", label: "Waterford" },
   { value: "westmeath", label: "Westmeath" },
   { value: "wexford", label: "Wexford" },
@@ -577,6 +572,7 @@ const counties = [
 
 const propertyTypes = [
   { value: "all", label: "All" },
+
   { value: "terrace", label: "Terrace" },
   { value: "studio_apartment", label: "Studio Apartment" },
   { value: "duplex", label: "Duplex" },
@@ -854,15 +850,6 @@ class Map extends Component {
       radius = 15;
     }
 
-    var markerParams = {
-      radius: radius,
-      fillColor: "grey", // Default to grey if under_pc is null
-      color: "black",
-      weight: 1,
-      opacity: 0.5,
-      fillOpacity: 0.8,
-    };
-
     let value = null;
     if (this.state.dataOption === "matchedWithPPR") {
       value = feature.properties.under_pc;
@@ -873,10 +860,10 @@ class Map extends Component {
     let maxValue = 0;
 
     if (this.state.dataOption === "PPRPrice") {
-      minValue = 100000;
+      minValue = 200000;
       maxValue = 850000;
     } else if (this.state.dataOption === "allHistoricalListings") {
-      minValue = 100000;
+      minValue = 200000;
       maxValue = 850000;
     } else if (this.state.dataOption === "rentals") {
       minValue = 800;
@@ -898,6 +885,15 @@ class Map extends Component {
     red = Math.round(255 * normalizedValue);
     green = Math.round(255 * (1 - normalizedValue));
     blue = 0;
+
+    var markerParams = {
+      radius: radius,
+      fillColor: "grey", // Default to grey if under_pc is null
+      color: "black",
+      weight: 1,
+      opacity: 1,
+      fillOpacity: 1,
+    };
 
     markerParams.fillColor =
       "#" +
@@ -1148,7 +1144,7 @@ class Map extends Component {
     );
 
     const startYear = params.get("startyear") ? params.get("startyear") : 2023;
-    const endYear = params.get("endyear") ? params.get("endyear") : 2025;
+    const endYear = params.get("endyear") ? params.get("endyear") : 2026;
     const dataOption = params.get("dataoption")
       ? params.get("dataoption")
       : "PPRPrice";
